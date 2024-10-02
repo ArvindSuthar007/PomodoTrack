@@ -12,20 +12,6 @@ export default {
           "sans-serif",
         ],
       },
-      keyframes: {
-        check: {
-          "0%": { strokeDashoffset: "500" },
-          "100%": { strokeDashoffset: "0" },
-        },
-        ripple: {
-          "0%": { transform: "scale(0)" },
-          "100%": { transform: "scale(1)" },
-        },
-      },
-      animation: {
-        check: "check 4s forwards",
-        ripple: "ripple 0.3s",
-      },
     },
   },
   plugins: [],

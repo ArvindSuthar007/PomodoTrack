@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import Check_box from "./Checkbox/Check_box.tsx";
 
 interface List_itemProps {
   text: string;
@@ -60,7 +59,6 @@ function List_item({
         className={`m-2 p-6 w-[--genral-width] min-h-14 rounded border-l-8 border-white hover:border-black/20 bg-white flex peer-checked:border-slate-800
           ${editing ? "flex-col" : "items-center justify-between"}`}
       >
-        <Check_box />
         {editing ? (
           <>
             <div className="flex justify-between">
