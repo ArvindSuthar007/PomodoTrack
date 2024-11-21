@@ -1,19 +1,17 @@
-import { useState } from "react";
+import { useCallback, useState, useContext } from "react";
+import GlobalContext from "./globalContext";
 
-export interface Add_taskProps {
-  item_adder: (text: string) => void;
-}
-
-export default function Add_task({ item_adder }: Add_taskProps) {
+export default function Add_task() {
   const [text, setText] = useState("");
   const [inputState, setInputState] = useState(true);
+  const { item_adder } = useContext(GlobalContext);
 
-  const handleButtonClick = () => {
+  const handleButtonClick = useCallback(() => {
     if (text.trim() === "") return;
     setInputState(!inputState);
     item_adder(text.trim());
     setText("");
-  };
+  }, [text, inputState, item_adder]);
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") handleButtonClick();

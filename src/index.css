@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@tailwind variants;
 
 @layer base {
   @font-face {
@@ -16,7 +17,7 @@
 
 :root {
   --bg-color: #ba4949;
-  --genral-width: 52%;
+  --genral-width: 25rem;
 
   font-family: "ArialRounded", Inter, system-ui, Avenir, Helvetica, Arial,
     sans-serif;

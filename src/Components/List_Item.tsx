@@ -1,39 +1,41 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, memo, useContext } from "react";
+import { List_itemProps } from "../vite-env";
+import GlobalContext from "./globalContext";
+import Checkmarker from "./Checkmarker";
 
-interface List_itemProps {
-  text: string;
-  index: number;
-  handleDelete: (index: number) => void;
-  handleEdits: (index: number, text: string) => void;
-  handleTimer: (index: number, totalTime: number) => void;
-  buttonState: boolean;
-}
-
-function List_item({
-  text,
-  index,
-  handleDelete,
-  handleEdits,
-  handleTimer,
-  buttonState,
-}: List_itemProps) {
+const List_item = memo(({ text, index, isCompleted }: List_itemProps) => {
   const [editing, setEditing] = useState(false);
   const [textvalue, setTextvalue] = useState(text);
-  const radioRef = useRef<HTMLInputElement>(null);
+  const radioRef = useRef<HTMLInputElement>(null); //can be removed with replaced functionality
   const countdown = useRef(0);
 
+  const {
+    buttonState,
+    selectedTimer,
+    selectedItem,
+    setSelectedItem,
+    handleTimer,
+    handleEdits,
+    handleDelete,
+  } = useContext(GlobalContext);
+
   useEffect(() => {
+    let timerId: number;
     if (buttonState === true && radioRef.current?.checked) {
-      const timerId = setInterval(() => {
-        countdown.current += 0.5;
+      let startSec = Math.floor(Date.now() / 1000);
+      timerId = window.setInterval(() => {
+        countdown.current += Math.floor(Date.now() / 1000) - startSec;
+        startSec = Math.floor(Date.now() / 1000);
       }, 1000);
-      return () => {
-        clearInterval(timerId);
-        handleTimer(index, countdown.current);
-        countdown.current = 0;
-      };
     }
-  }, [buttonState, handleTimer, index, radioRef]);
+    return () => {
+      if (timerId) {
+        clearInterval(timerId);
+        handleTimer(index, countdown.current, selectedTimer);
+        countdown.current = 0;
+      }
+    };
+  }, [buttonState, index, handleTimer, selectedTimer]);
 
   const handleEdit = () => {
     setEditing(!editing);
@@ -46,30 +48,50 @@ function List_item({
     e.key === "Enter" && handleEdit();
 
   return (
-    <div className="w-full flex justify-center has-[:checked]:translate-y-[2px] transition duration-200 ease-in-out">
+    <div
+      className={
+        "overflow-hidden w-full flex justify-center has-[:checked]:translate-y-[2px] has-[:checked]:animate-expand select-none"
+      }
+    >
       <input
         ref={radioRef}
         type="radio"
         className="hidden peer"
         name="list_item"
         id={`list_item${index}`}
+        checked={selectedItem === index}
+        onChange={() => {}}
       />
       <label
         htmlFor={`list_item${index}`}
-        className={`m-2 p-6 w-[--genral-width] min-h-14 rounded border-l-8 border-white hover:border-black/20 bg-white flex peer-checked:border-slate-800
-          ${editing ? "flex-col" : "items-center justify-between"}`}
+        onClick={() => {
+          setSelectedItem(index);
+        }}
+        className={`m-[0.3rem] py-4 px-2 w-[--genral-width] min-h-16 rounded border-l-8
+          border-white hover:border-black/20 bg-white flex peer-checked:border-slate-800
+          transition-[max-height] duration-300 overflow-hidden ${
+            editing
+              ? "flex-col max-h-[300px]"
+              : "items-center justify-between max-h-[60px]"
+          }`}
       >
         {editing ? (
           <>
-            <div className="flex justify-between">
+            <div className="flex items-betweeen justify-center">
+              <Checkmarker index={index} isCompleted={isCompleted} />
               <input
                 type="text"
                 onChange={handleChange}
                 onKeyDown={handleKeyDown}
-                className="w-auto min-w-0 text-2xl text-black bg-white focus:outline-none"
+                className="grow text-xl text-black bg-white focus:outline-none"
                 value={textvalue}
               />
-              <input type="checkbox" checked={editing} onChange={handleEdit} />
+              <input
+                type="checkbox"
+                className="mr-4"
+                checked={editing}
+                onChange={handleEdit}
+              />
             </div>
             <div className="w-full flex justify-end">
               <button
@@ -82,13 +104,21 @@ function List_item({
           </>
         ) : (
           <>
-            <h3 className="text-2xl text-black">{textvalue}</h3>
-            <input type="checkbox" checked={editing} onChange={handleEdit} />
+            <Checkmarker index={index} isCompleted={isCompleted} />
+            <h3 className="grow text-xl text-black peer-checked:line-through peer-checked:opacity-40">
+              {textvalue}
+            </h3>
+            <input
+              type="checkbox"
+              className="mr-4"
+              checked={editing}
+              onChange={handleEdit}
+            />
           </>
         )}
       </label>
     </div>
   );
-}
+});
 
 export default List_item;
