@@ -7,7 +7,7 @@ This is a simple web application that can be used to keep track of time spent on
 - Clone the repository
 - Install the dependencies with `npm install`
 - Start the development server with `npm run dev`
-- Open the application in your web browser at `http://localhost:3000`
+- Open the application in your web browser at `http://localhost:5173`
 
 ## Copyright
 
