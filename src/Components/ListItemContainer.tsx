@@ -1,22 +1,22 @@
 import { useContext } from "react";
-import List_item from "./List_Item";
-import Add_task from "./Add_task";
+import ListItem from "./ListItem";
+import AddTask from "./AddTask";
 import GlobalContext from "./globalContext";
 
-export default function List_item_container() {
+export default function ListItemContainer() {
   const { arr } = useContext(GlobalContext);
 
   return (
     <div className="w-1/2 min-h-auto max-h-auto flex flex-col items-center">
       {arr.map((item, index) => (
-        <List_item
+        <ListItem
           key={item.id}
-          text={item.text}
+          text={item.title}
           index={index}
-          isCompleted={item.isCompleted}
+          isCompleted={item.done}
         />
       ))}
-      <Add_task />
+      <AddTask />
     </div>
   );
 }

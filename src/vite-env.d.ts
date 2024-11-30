@@ -1,17 +1,20 @@
 /// <reference types="vite/client" />
 
-import { Dispatch, SetStateAction } from "react";
+import React, { Dispatch, SetStateAction } from "react";
 
 //List_item_container
+interface currentTimes {
+  pomodoro: number;
+  shortBreak: number;
+  longBreak: number;
+}
 declare type ArrItemType = {
   id: number;
-  text: string;
-  timer: number;
-  timerType: string;
-  shortBreaks: number;
-  longBreaks: number;
-  totalTime: number;
-  isCompleted: boolean;
+  title: string;
+  currentTime: number;
+  selectedTimer: "pomodoro" | "shortBreak" | "longBreak";
+  pomodoros: currentTimes;
+  done: boolean;
 };
 
 //List_Item
@@ -27,17 +30,23 @@ declare type GlobalContextType = {
   setArr: Dispatch<SetStateAction<ArrItemType[]>>;
   buttonState: boolean;
   setButtonState: Dispatch<SetStateAction<boolean>>;
-  selectedTimer: string;
-  setSelectedTimer: Dispatch<SetStateAction<string>>;
+  selectedTimer: "pomodoro" | "shortBreak" | "longBreak";
+  setSelectedTimer: Dispatch<
+    SetStateAction<"pomodoro" | "shortBreak" | "longBreak">
+  >;
   handleDelete: (index: number) => void;
   handleEdits: (index: number, text: string) => void;
   handleEditsStatus: (index: number, marker: boolean) => void;
-  handleTimer: (
-    index: number,
-    receivedTime: number,
-    selectedTimer: string
-  ) => void;
+  handleTimer: (index: number) => void;
   item_adder: (text: string) => void;
   selectedItem: number;
   setSelectedItem: Dispatch<SetStateAction<number>>;
+  duration: React.MutableRefObject<number>;
+  handlePomodoros: (index: number) => void;
+};
+
+//defaultValueContext
+declare type DefaultValueContextType = {
+  default_timers: currentTimes;
+  LocalStorageManager: typeof LocalStorageManager;
 };

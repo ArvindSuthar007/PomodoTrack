@@ -1,7 +1,7 @@
 import { useCallback, useState, useContext } from "react";
 import GlobalContext from "./globalContext";
 
-export default function Add_task() {
+export default function AddTask() {
   const [text, setText] = useState("");
   const [inputState, setInputState] = useState(true);
   const { item_adder } = useContext(GlobalContext);
@@ -20,22 +20,22 @@ export default function Add_task() {
   return (
     <>
       {inputState ? (
-        <div
+        <button
           className="m-2 w-[--genral-width] min-h-14 p-6 
-                rounded-lg border-4 border-dashed border-white opacity-50
-                text-xl font-extrabold
-                hover:opacity-100 hover:cursor-pointer
-                flex justify-center items-center
-                transition duration-300 ease-in-out"
+            text-xl font-extrabold
+            rounded-lg border-4 border-dashed border-white opacity-50
+            hover:opacity-100 hover:cursor-pointer
+            flex justify-center items-center
+            transition duration-300 ease-in-out"
           onClick={() => setInputState(!inputState)}
         >
           Add Task
-        </div>
+        </button>
       ) : (
         <div
           className="m-2 w-[--genral-width] min-h-14 p-6 
-                rounded-lg border-4 border-dashed border-white
-                text-xl text-white font-extrabold bg-transparent"
+            text-xl text-white font-extrabold bg-transparent
+            rounded-lg border-4 border-dashed border-white"
         >
           <input
             type="text"
@@ -45,7 +45,6 @@ export default function Add_task() {
             onChange={(e) => setText(e.target.value)}
             onKeyDown={handleKeyDown}
           />
-          {/* <button onClick={handleButtonClick}>Save</button> */}
         </div>
       )}
     </>

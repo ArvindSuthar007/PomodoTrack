@@ -1,17 +1,19 @@
-import { useEffect, useRef, useState, memo, useContext } from "react";
+import { useEffect, useRef, useState, useContext } from "react";
 import { List_itemProps } from "../vite-env";
 import GlobalContext from "./globalContext";
 import Checkmarker from "./Checkmarker";
 
-const List_item = memo(({ text, index, isCompleted }: List_itemProps) => {
+export default function ListItem({
+  text,
+  index,
+  isCompleted,
+}: Readonly<List_itemProps>) {
   const [editing, setEditing] = useState(false);
   const [textvalue, setTextvalue] = useState(text);
   const radioRef = useRef<HTMLInputElement>(null); //can be removed with replaced functionality
-  const countdown = useRef(0);
 
   const {
     buttonState,
-    selectedTimer,
     selectedItem,
     setSelectedItem,
     handleTimer,
@@ -20,22 +22,11 @@ const List_item = memo(({ text, index, isCompleted }: List_itemProps) => {
   } = useContext(GlobalContext);
 
   useEffect(() => {
-    let timerId: number;
-    if (buttonState === true && radioRef.current?.checked) {
-      let startSec = Math.floor(Date.now() / 1000);
-      timerId = window.setInterval(() => {
-        countdown.current += Math.floor(Date.now() / 1000) - startSec;
-        startSec = Math.floor(Date.now() / 1000);
-      }, 1000);
+    if (index === selectedItem) {
+      handleTimer(index);
     }
-    return () => {
-      if (timerId) {
-        clearInterval(timerId);
-        handleTimer(index, countdown.current, selectedTimer);
-        countdown.current = 0;
-      }
-    };
-  }, [buttonState, index, handleTimer, selectedTimer]);
+    return () => {};
+  }, [buttonState, index, handleTimer, selectedItem]);
 
   const handleEdit = () => {
     setEditing(!editing);
@@ -61,12 +52,12 @@ const List_item = memo(({ text, index, isCompleted }: List_itemProps) => {
         id={`list_item${index}`}
         checked={selectedItem === index}
         onChange={() => {}}
-      />
-      <label
-        htmlFor={`list_item${index}`}
         onClick={() => {
           setSelectedItem(index);
         }}
+      />
+      <label
+        htmlFor={`list_item${index}`}
         className={`m-[0.3rem] py-4 px-2 w-[--genral-width] min-h-16 rounded border-l-8
           border-white hover:border-black/20 bg-white flex peer-checked:border-slate-800
           transition-[max-height] duration-300 overflow-hidden ${
@@ -119,6 +110,4 @@ const List_item = memo(({ text, index, isCompleted }: List_itemProps) => {
       </label>
     </div>
   );
-});
-
-export default List_item;
+}

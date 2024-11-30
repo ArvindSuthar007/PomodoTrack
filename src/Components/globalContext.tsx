@@ -1,20 +1,23 @@
-import { createContext, useEffect, useState, ReactNode } from "react";
+import {
+  createContext,
+  useEffect,
+  useState,
+  ReactNode,
+  useMemo,
+  useRef,
+  useCallback,
+  useContext,
+} from "react";
 import { ArrItemType, GlobalContextType } from "../vite-env";
+import DefaultValueContext from "./defaultValueContext";
 import toast from "react-hot-toast";
-
-//TODO: Fix the toasts
-//BUG: cannot change status without being selectedItem
-const add = () => toast.success("Item Added");
-const deleter = () => toast.success("deleted");
-const edit = () => toast.success("edit");
-const statusEdit = () => toast.success("edited");
 
 const GlobalContext = createContext<GlobalContextType>({
   arr: [],
   setArr: () => {},
   buttonState: false,
   setButtonState: () => {},
-  selectedTimer: "",
+  selectedTimer: "pomodoro",
   setSelectedTimer: () => {},
   handleDelete: () => {},
   handleEdits: () => {},
@@ -23,104 +26,229 @@ const GlobalContext = createContext<GlobalContextType>({
   item_adder: () => {},
   selectedItem: 0,
   setSelectedItem: () => {},
+  duration: { current: 1500 },
+  handlePomodoros: () => {},
 });
 
 export const GlobalProvider = ({ children }: { children: ReactNode }) => {
-  const [arr, setArr] = useState<ArrItemType[]>(() => {
-    const storedList = localStorage.getItem("list");
-    return storedList ? JSON.parse(storedList) : [];
-  });
+  const { default_timers, LocalStorageManager } =
+    useContext(DefaultValueContext);
+  //Used by ListitemContainer
+  const [arr, setArr] = useState<ArrItemType[]>(
+    LocalStorageManager.get("list", [])
+  );
 
+  //Used by Listitem
+  const [selectedItem, setSelectedItem] = useState(() =>
+    LocalStorageManager.get("selectedItem", 0)
+  );
+
+  //Used by Timer
   const [buttonState, setButtonState] = useState(false);
-  const [selectedTimer, setSelectedTimer] = useState("pomodoro");
+  const [selectedTimer, setSelectedTimer] = useState<
+    "pomodoro" | "shortBreak" | "longBreak"
+  >(() => arr[selectedItem]?.selectedTimer ?? "pomodoro");
 
-  const [selectedItem, setSelectedItem] = useState(() => {
-    const num = localStorage.getItem("selectedItem") ?? "0";
-    return parseInt(num);
-  });
+  // updation of duration as per item selected
+  const duration = useRef(
+    arr.length > 0 && arr[selectedItem]
+      ? arr[selectedItem].currentTime
+      : default_timers.pomodoro
+  );
 
+  // Stores arr in localstorage
   useEffect(() => {
-    localStorage.setItem("list", JSON.stringify(arr));
-  }, [arr]);
+    LocalStorageManager.save("list", arr);
+  }, [arr, LocalStorageManager]);
 
+  //Stores selectedItem in localstorage & updates duration as per selected Item
   useEffect(() => {
-    localStorage.setItem("selectedItem", `${selectedItem}`);
-  }, [selectedItem]);
+    LocalStorageManager.save("selectedItem", selectedItem);
 
-  const handleTimer = (
-    index: number,
-    receivedTime: number,
-    selectedTimer: string
-  ) => {
-    setArr((prevState) => {
-      const newList = [...prevState];
-      if (selectedTimer === "pomodoro") {
-        newList[index].totalTime += receivedTime;
-      } else if (selectedTimer === "shortBreak") {
-        newList[index].shortBreaks += receivedTime;
-      } else if (selectedTimer === "longBreak") {
-        newList[index].longBreaks += receivedTime;
+    if (selectedTimer === "pomodoro") {
+      duration.current =
+        arr.length > 0 && arr[selectedItem]
+          ? arr[selectedItem].currentTime
+          : default_timers.pomodoro;
+    } else if (selectedTimer === "shortBreak") {
+      duration.current = default_timers.shortBreak;
+    } else if (selectedTimer === "longBreak") {
+      duration.current = default_timers.longBreak;
+    }
+  }, [arr, selectedItem, selectedTimer, default_timers, LocalStorageManager]);
+
+  //changes background color as per selected timer
+  useEffect(() => {
+    switch (selectedTimer) {
+      case "pomodoro":
+        document.documentElement.style.setProperty(
+          "--bg-color",
+          "rgb(186, 73, 73)"
+        );
+        break;
+      case "shortBreak":
+        document.documentElement.style.setProperty(
+          "--bg-color",
+          "rgb(56, 133, 138)"
+        );
+        break;
+      case "longBreak":
+        document.documentElement.style.setProperty(
+          "--bg-color",
+          "rgb(57, 112, 151)"
+        );
+        break;
+    }
+  }, [selectedTimer]);
+
+  const handleTimer = useCallback(
+    (index: number) => {
+      setArr((prevState) => {
+        const newList = [...prevState];
+
+        const itemAtIndex = newList[index];
+        if (!itemAtIndex) return prevState;
+        if (selectedTimer === "pomodoro")
+          itemAtIndex.currentTime = duration.current;
+
+        return newList;
+      });
+    },
+    [selectedTimer]
+  );
+
+  //Basic storage/data-manipulation functions
+  const handlePomodoros = useCallback(
+    (index: number) => {
+      setArr((prevState) => {
+        const newList = [...prevState];
+
+        const itemAtIndex = newList[index];
+        if (!itemAtIndex) return prevState;
+
+        if (selectedTimer === "pomodoro") {
+          itemAtIndex.pomodoros.pomodoro += 1;
+          newList[index].currentTime = default_timers.pomodoro;
+          duration.current = default_timers.pomodoro;
+        } else if (selectedTimer === "shortBreak") {
+          itemAtIndex.pomodoros.shortBreak += 1;
+          duration.current = default_timers.shortBreak;
+        } else if (selectedTimer === "longBreak") {
+          itemAtIndex.pomodoros.longBreak += 1;
+          duration.current = default_timers.longBreak;
+        }
+
+        return newList;
+      });
+    },
+    [selectedTimer, default_timers]
+  );
+
+  const item_adder = useCallback(
+    (title: string) => {
+      const newItem: ArrItemType = {
+        id: Date.now(),
+        title: title.trim(),
+        currentTime: default_timers.pomodoro,
+        selectedTimer: "pomodoro",
+        pomodoros: {
+          pomodoro: 0,
+          shortBreak: 0,
+          longBreak: 0,
+        },
+        done: false,
+      };
+
+      if (newItem.title) {
+        setArr((prevState) => [...prevState, newItem]);
+        toast.success("Task added successfully");
       }
-      return newList;
-    });
-  };
+    },
+    [default_timers.pomodoro]
+  );
 
-  const item_adder = (text: string) => {
-    const newItem: ArrItemType = {
-      id: Date.now(),
-      text: text,
-      timer: 1500,
-      timerType: "pomodoro",
-      shortBreaks: 0,
-      longBreaks: 0,
-      totalTime: 0,
-      isCompleted: false,
-    };
-    setArr((prevState) => [...prevState, newItem]);
-    add();
-  };
+  const handleDelete = useCallback(
+    (index: number) => {
+      if (index >= 0 && index < arr.length) {
+        setArr((prevState) => {
+          const newList = prevState.filter((_, i) => i !== index);
 
-  const handleDelete = (index: number) => {
-    setArr((prevState) => prevState.filter((_, i) => i !== index));
-    deleter();
-  };
+          let newSelectedItem: number = selectedItem;
+          if (index === selectedItem) {
+            newSelectedItem = 0;
+          }
+          setSelectedItem(newSelectedItem);
 
-  const handleEdits = (index: number, text: string) => {
-    setArr((prevState) => {
-      const newList = [...prevState];
-      newList[index].text = text;
-      return newList;
-    });
-    edit();
-  };
+          return newList;
+        });
+        toast.success("Task deleted");
+      }
+    },
+    [arr.length, selectedItem]
+  );
 
-  const handleEditsStatus = (index: number, marker: boolean) => {
-    setArr((prevState) => {
-      const newList = [...prevState];
-      newList[index].isCompleted = marker;
-      return newList;
-    });
-    statusEdit();
-  };
+  const handleEdits = useCallback(
+    (index: number, title: string) => {
+      if (index >= 0 && index < arr.length && title.trim()) {
+        setArr((prevState) => {
+          const newList = [...prevState];
+          newList[index].title = title.trim();
+          return newList;
+        });
+        toast.success("Task updated");
+      }
+    },
+    [arr.length]
+  );
 
+  const handleEditsStatus = useCallback(
+    (index: number, marker: boolean) => {
+      if (index >= 0 && index < arr.length) {
+        setArr((prevState) => {
+          const newList = [...prevState];
+          newList[index].done = marker;
+          return newList;
+        });
+        toast.success("Task status changed");
+      }
+    },
+    [arr.length]
+  );
+
+  const contextValue = useMemo(
+    () => ({
+      arr,
+      setArr,
+      buttonState,
+      setButtonState,
+      selectedTimer,
+      setSelectedTimer,
+      selectedItem,
+      setSelectedItem,
+      duration,
+      handlePomodoros,
+      handleDelete,
+      handleEdits,
+      handleEditsStatus,
+      handleTimer,
+      item_adder,
+    }),
+    [
+      arr,
+      buttonState,
+      selectedTimer,
+      selectedItem,
+      duration,
+      handlePomodoros,
+      handleDelete,
+      handleEdits,
+      handleEditsStatus,
+      handleTimer,
+      item_adder,
+    ]
+  );
   return (
-    <GlobalContext.Provider
-      value={{
-        arr,
-        setArr,
-        buttonState,
-        setButtonState,
-        selectedTimer,
-        setSelectedTimer,
-        selectedItem,
-        setSelectedItem,
-        handleDelete,
-        handleEdits,
-        handleEditsStatus,
-        handleTimer,
-        item_adder,
-      }}
-    >
+    <GlobalContext.Provider value={contextValue}>
       {children}
     </GlobalContext.Provider>
   );

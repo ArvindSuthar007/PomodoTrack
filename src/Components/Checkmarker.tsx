@@ -1,4 +1,3 @@
-// Checkmarker.tsx
 import { useContext, useRef } from "react";
 import checkmark_mono from "../assets/checkmark_mono.svg";
 import GlobalContext from "./globalContext";
@@ -21,7 +20,7 @@ const Checkmarker = ({
   };
 
   return (
-    <div onClick={handleCheckmarkClick} className="mr-2">
+    <button onClick={handleCheckmarkClick} className="mr-2">
       <img
         src={checkmark_mono}
         alt="checkmark"
@@ -33,7 +32,7 @@ const Checkmarker = ({
             : ""
         }
       />
-    </div>
+    </button>
   );
 };
 
