@@ -7,18 +7,59 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# Dependency directories
+node_modules/
+
+# Build output directories
+dist/
+dist-ssr/
+
+# Local environment files
 *.local
 
+# Vite cache
+.vite/
+
+# pnpm store
+.pnpm/
+
 # Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+.vscode/
+!.vscode/extensions.json  # Keep shared workspace settings
+.idea/
 .DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# Tailwind CSS cache (if enabled)
+.tailwindcss/
+
+# TypeScript build output
+*.tsbuildinfo
+
+# Test coverage
+coverage/
+
+# Debugging artifacts
+*.log
+*.gz
+*.tgz
+
+# Environment files
+.env
+.env.*
+.env.local
+
+# Storybook output
+storybook-static/
+
+# Linting and formatting cache
+.eslintcache
+.prettier-cache/
+
+# Temporary files
+*.tmp
+*.temp

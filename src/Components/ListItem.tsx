@@ -41,7 +41,7 @@ export default function ListItem({
   return (
     <div
       className={
-        "overflow-hidden w-full flex justify-center has-[:checked]:translate-y-[2px] has-[:checked]:animate-expand select-none"
+        "overflow-hidden w-full flex justify-center has-[:checked]:translate-y-[2px] has-[:checked]:animate-expand outline-none"
       }
     >
       <input
