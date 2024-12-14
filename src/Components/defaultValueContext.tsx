@@ -1,4 +1,4 @@
-import { createContext, useEffect, useMemo } from "react";
+import { createContext, useEffect, useMemo, useState } from "react";
 import { DefaultValueContextType } from "../vite-env";
 
 class LocalStorageManager {
@@ -26,12 +26,13 @@ class LocalStorageManager {
 }
 
 const DefaultValueContext = createContext<DefaultValueContextType>({
-  default_timers: {
+  defaultTimers: {
     pomodoro: 1500,
-    shortBreak: 5,
+    shortBreak: 300,
     longBreak: 900,
   },
-  LocalStorageManager: LocalStorageManager,
+  setDefaultTimers: () => {},
+  LocalStorageManager,
 });
 
 export const DefaultValueContextProvider = ({
@@ -39,25 +40,25 @@ export const DefaultValueContextProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const default_timers = useMemo(
-    () => ({
+  const [defaultTimers, setDefaultTimers] = useState(() =>
+    LocalStorageManager.get("default_timers", {
       pomodoro: 1500,
       shortBreak: 300,
       longBreak: 900,
-    }),
-    []
+    })
   );
 
   useEffect(() => {
-    LocalStorageManager.save("default_timers", JSON.stringify(default_timers));
-  }, [default_timers]);
+    LocalStorageManager.save("default_timers", defaultTimers);
+  }, [defaultTimers]);
 
   const contextValue = useMemo(
     () => ({
-      default_timers,
+      defaultTimers,
+      setDefaultTimers,
       LocalStorageManager,
     }),
-    [default_timers]
+    [defaultTimers]
   );
   return (
     <DefaultValueContext.Provider value={contextValue}>

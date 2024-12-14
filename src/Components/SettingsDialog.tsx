@@ -1,13 +1,16 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useContext } from "react";
 import Switch from "./ui/Switch";
+import DefaultValueContext from "./defaultValueContext";
 
-interface SettingsDialogProps {
+const SettingsDialog = ({
+  isOpen,
+  onClose,
+}: {
   isOpen: boolean;
   onClose: () => void;
-}
-
-const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
+}) => {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const { defaultTimers, setDefaultTimers } = useContext(DefaultValueContext);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -31,36 +34,40 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-transparent bg-opacity-50 flex items-center justify-center z-50">
+    <section className="fixed inset-0 bg-transparent bg-opacity-50 flex items-center justify-center z-50">
       <div
         ref={dialogRef}
-        className="bg-white white p-6 rounded-lg shadow-xl max-w-lg w-full overflow-y-auto font-ArialRoundedBold"
+        className="bg-white white p-6 rounded-lg shadow-xl max-w-lg w-full overflow-y-auto font-ArialRoundedBold space-y-4"
       >
         {/* Header Section */}
-        <div className="flex justify-between items-center border-b pb-2 text-gray-400 ">
+        <section className="flex justify-between items-center border-b pb-2 text-gray-400 ">
           <div className="flex items-center justify-center grow">
             <h2 className="text-lg font-bold">SETTING</h2>
           </div>
           <button className="hover:text-gray-800" onClick={onClose}>
             ✕
           </button>
-        </div>
+        </section>
 
         {/* Timer Section */}
-        <div className="text-gray-400">
+        <section className="text-gray-400 space-y-3">
           <h3 className="text-md font-semibold">TIMER</h3>
           <div className="grid grid-cols-3 gap-4">
-            <div>
+            <section>
               <label htmlFor="pomodoro" className="block text-sm">
                 Pomodoro
               </label>
               <input
                 id="pomodoro"
                 type="number"
-                defaultValue={45}
+                defaultValue={defaultTimers.pomodoro / 60}
                 className="w-full p-2 border-none rounded-lg bg-gray-100 focus:outline-none text-gray-700 "
+                onChange={(e) => {
+                  const pomodoro = Number(e.target.value) * 60;
+                  setDefaultTimers({ ...defaultTimers, pomodoro });
+                }}
               />
-            </div>
+            </section>
 
             <div>
               <label htmlFor="shortBreak" className="block text-sm ">
@@ -115,10 +122,10 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
               className="w-1/5 p-2 border-gray-100 rounded-lg bg-gray-100 focus:outline-none text-gray-700"
             />
           </div>
-        </div>
+        </section>
 
         {/* Task Section */}
-        <div className="">
+        <section className="space-y-3">
           <h3 className="text-lg font-semibold text-gray-400">Task</h3>
           <div className="flex items-center justify-between">
             <span className="flex items-center text-base text-gray-600">
@@ -133,7 +140,7 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
             </span>
             <Switch />
           </div>
-        </div>
+        </section>
 
         {/* Sound Section */}
         {/* <div className="space-y-4">
@@ -170,7 +177,7 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
 
         {/* Theme Section */}
       </div>
-    </div>
+    </section>
   );
 };
 

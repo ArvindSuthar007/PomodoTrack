@@ -11,7 +11,7 @@ export default function Timer() {
     selectedTimer,
     handlePomodoros,
   } = useContext(GlobalContext);
-  const { default_timers } = useContext(DefaultValueContext);
+  const { defaultTimers } = useContext(DefaultValueContext);
 
   const [time, setTime] = useState(() => {
     const minutes = Math.floor(duration.current / 60);
@@ -31,7 +31,7 @@ export default function Timer() {
         seconds < 10 ? "0" + seconds : seconds
       }`;
     });
-  }, [selectedItem, duration, selectedTimer]);
+  }, [selectedItem, duration, selectedTimer, defaultTimers]);
 
   useEffect(() => {
     if (buttonState) {
@@ -53,11 +53,11 @@ export default function Timer() {
 
           let newDuration;
           if (selectedTimer === "pomodoro") {
-            newDuration = default_timers.pomodoro;
+            newDuration = defaultTimers.pomodoro;
           } else if (selectedTimer === "shortBreak") {
-            newDuration = default_timers.shortBreak;
+            newDuration = defaultTimers.shortBreak;
           } else {
-            newDuration = default_timers.longBreak;
+            newDuration = defaultTimers.longBreak;
           }
 
           // Immediately update the time display
@@ -80,7 +80,7 @@ export default function Timer() {
     duration,
     selectedItem,
     handlePomodoros,
-    default_timers,
+    defaultTimers,
     selectedTimer,
   ]);
 

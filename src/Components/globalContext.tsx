@@ -31,7 +31,7 @@ const GlobalContext = createContext<GlobalContextType>({
 });
 
 export const GlobalProvider = ({ children }: { children: ReactNode }) => {
-  const { default_timers, LocalStorageManager } =
+  const { defaultTimers, LocalStorageManager } =
     useContext(DefaultValueContext);
   //Used by ListitemContainer
   const [arr, setArr] = useState<ArrItemType[]>(
@@ -53,7 +53,7 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
   const duration = useRef(
     arr.length > 0 && arr[selectedItem]
       ? arr[selectedItem].currentTime
-      : default_timers.pomodoro
+      : defaultTimers.pomodoro
   );
 
   // Stores arr in localstorage
@@ -68,14 +68,14 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
     if (selectedTimer === "pomodoro") {
       duration.current =
         arr.length > 0 && arr[selectedItem]
-          ? arr[selectedItem].currentTime
-          : default_timers.pomodoro;
+          ? defaultTimers.pomodoro - arr[selectedItem].currentTime
+          : defaultTimers.pomodoro;
     } else if (selectedTimer === "shortBreak") {
-      duration.current = default_timers.shortBreak;
+      duration.current = defaultTimers.shortBreak;
     } else if (selectedTimer === "longBreak") {
-      duration.current = default_timers.longBreak;
+      duration.current = defaultTimers.longBreak;
     }
-  }, [arr, selectedItem, selectedTimer, default_timers, LocalStorageManager]);
+  }, [arr, selectedItem, selectedTimer, defaultTimers, LocalStorageManager]);
 
   //changes background color as per selected timer
   useEffect(() => {
@@ -128,20 +128,20 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
 
         if (selectedTimer === "pomodoro") {
           itemAtIndex.pomodoros.pomodoro += 1;
-          newList[index].currentTime = default_timers.pomodoro;
-          duration.current = default_timers.pomodoro;
+          newList[index].currentTime = defaultTimers.pomodoro;
+          duration.current = defaultTimers.pomodoro;
         } else if (selectedTimer === "shortBreak") {
           itemAtIndex.pomodoros.shortBreak += 1;
-          duration.current = default_timers.shortBreak;
+          duration.current = defaultTimers.shortBreak;
         } else if (selectedTimer === "longBreak") {
           itemAtIndex.pomodoros.longBreak += 1;
-          duration.current = default_timers.longBreak;
+          duration.current = defaultTimers.longBreak;
         }
 
         return newList;
       });
     },
-    [selectedTimer, default_timers]
+    [selectedTimer, defaultTimers]
   );
 
   const item_adder = useCallback(
@@ -149,7 +149,7 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
       const newItem: ArrItemType = {
         id: Date.now(),
         title: title.trim(),
-        currentTime: default_timers.pomodoro,
+        currentTime: 0,
         selectedTimer: "pomodoro",
         pomodoros: {
           pomodoro: 0,
@@ -161,20 +161,26 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
 
       if (newItem.title) {
         setArr((prevState) => [...prevState, newItem]);
+        if (selectedItem === 0) setSelectedItem(newItem.id);
         toast.success("Task added successfully");
       }
     },
-    [default_timers.pomodoro]
+    [selectedItem]
   );
 
   const handleDelete = useCallback(
-    (index: number) => {
+    (index: number, id: number) => {
       if (index >= 0 && index < arr.length) {
         setArr((prevState) => {
-          const newList = prevState.filter((_, i) => i !== index);
+          const newList = [...prevState];
+          newList.splice(index, 1);
 
           let newSelectedItem: number = selectedItem;
-          if (index === selectedItem) {
+          if (id === selectedItem && arr.length - 1 === index) {
+            newSelectedItem = arr[index - 1].id;
+          } else if (id === selectedItem && arr.length - 1 > index) {
+            newSelectedItem = newList[index].id;
+          } else if (newList.length === 0) {
             newSelectedItem = 0;
           }
           setSelectedItem(newSelectedItem);
@@ -184,7 +190,7 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
         toast.success("Task deleted");
       }
     },
-    [arr.length, selectedItem]
+    [arr, selectedItem]
   );
 
   const handleEdits = useCallback(

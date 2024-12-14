@@ -5,6 +5,7 @@ import Checkmarker from "./Checkmarker";
 
 export default function ListItem({
   text,
+  id,
   index,
   isCompleted,
 }: Readonly<List_itemProps>) {
@@ -22,11 +23,11 @@ export default function ListItem({
   } = useContext(GlobalContext);
 
   useEffect(() => {
-    if (index === selectedItem) {
+    if (id === selectedItem) {
       handleTimer(index);
     }
     return () => {};
-  }, [buttonState, index, handleTimer, selectedItem]);
+  }, [buttonState, index, handleTimer, selectedItem, id]);
 
   const handleEdit = () => {
     setEditing(!editing);
@@ -39,7 +40,7 @@ export default function ListItem({
     e.key === "Enter" && handleEdit();
 
   return (
-    <div
+    <section
       className={
         "overflow-hidden w-full flex justify-center has-[:checked]:translate-y-[2px] has-[:checked]:animate-expand outline-none"
       }
@@ -49,15 +50,15 @@ export default function ListItem({
         type="radio"
         className="hidden peer"
         name="list_item"
-        id={`list_item${index}`}
-        checked={selectedItem === index}
+        id={`list_item${id}`}
+        checked={selectedItem === id}
         onChange={() => {}}
         onClick={() => {
-          setSelectedItem(index);
+          setSelectedItem(id);
         }}
       />
       <label
-        htmlFor={`list_item${index}`}
+        htmlFor={`list_item${id}`}
         className={`m-[0.3rem] py-4 px-2 w-[--genral-width] min-h-16 rounded border-l-8
           border-white hover:border-black/20 bg-white flex peer-checked:border-slate-800
           transition-[max-height] duration-300 overflow-hidden ${
@@ -86,8 +87,11 @@ export default function ListItem({
             </div>
             <div className="w-full flex justify-end">
               <button
-                onClick={() => handleDelete(index)}
-                className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                onClick={() => {
+                  handleDelete(index, id);
+                  console.log("clicked", index);
+                }}
+                className="bg-red-500 text-white font-bold py-2 px-4 rounded"
               >
                 Delete
               </button>
@@ -108,6 +112,6 @@ export default function ListItem({
           </>
         )}
       </label>
-    </div>
+    </section>
   );
 }

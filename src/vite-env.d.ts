@@ -20,6 +20,7 @@ declare type ArrItemType = {
 //List_Item
 interface List_itemProps {
   text: string;
+  id: number;
   index: number;
   isCompleted: boolean;
 }
@@ -34,7 +35,7 @@ declare type GlobalContextType = {
   setSelectedTimer: Dispatch<
     SetStateAction<"pomodoro" | "shortBreak" | "longBreak">
   >;
-  handleDelete: (index: number) => void;
+  handleDelete: (index: number, id: number) => void;
   handleEdits: (index: number, text: string) => void;
   handleEditsStatus: (index: number, marker: boolean) => void;
   handleTimer: (index: number) => void;
@@ -47,6 +48,7 @@ declare type GlobalContextType = {
 
 //defaultValueContext
 declare type DefaultValueContextType = {
-  default_timers: currentTimes;
+  defaultTimers: currentTimes;
+  setDefaultTimers: Dispatch<SetStateAction<currentTimes>>;
   LocalStorageManager: typeof LocalStorageManager;
 };

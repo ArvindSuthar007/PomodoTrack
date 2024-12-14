@@ -18,9 +18,7 @@ export default function ListItemContainer() {
       const newList = [...arr];
       const draggedItemContent = newList[dragItemRef.current];
 
-      // Remove the dragged item from its original position
       newList.splice(dragItemRef.current, 1);
-      // Insert the dragged item at the new position
       newList.splice(index, 0, draggedItemContent);
 
       setArr(newList);
@@ -37,7 +35,7 @@ export default function ListItemContainer() {
     <div className="w-full min-h-screen flex flex-col items-center select-none">
       <div className="w-full flex flex-col outline-none">
         {arr.map((item, index) => (
-          <button
+          <article
             key={item.id}
             draggable
             onDragStart={() => handleDragStart(index)}
@@ -52,10 +50,11 @@ export default function ListItemContainer() {
           >
             <ListItem
               text={item.title}
-              index={item.id}
+              id={item.id}
+              index={index}
               isCompleted={item.done}
             />
-          </button>
+          </article>
         ))}
       </div>
       <AddTask />
